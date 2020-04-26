@@ -76,15 +76,30 @@ float SintetizaWfm(Din din){
 		break;
 
 		case TRIANGLE:
-			puts("TRIANGLE");
+			for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
+				k[i]=2*i-1;
+        	    ak[i]=0;
+        	    bk[i]=8/(pow(M_PI,2)*pow(i,2))*pow(-1, (i-1));	
+				puts("TRIANGLE");
+			}
 		break;
 
 		case SAWTOOTH_LEFT:
-			puts("SAWTOOTH LEFT");
+		    for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
+				k[i]=i;
+            	ak[i]=0;
+            	bk[i]=-2*pow(-1, i)/(M_PI*i);
+				puts("SAWTOOTH LEFT");
+			}
 		break;
 
 		case SAWTOOTH_RIGHT:
-			puts("SAWTOOTH RIGHT");
+		    for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
+				k[i]=i;
+            	ak[i]=0;
+            	bk[i]=2*pow(-1, i)/(M_PI*i);
+				puts("SAWTOOTH RIGHT");
+			}
 		break;
 
 		case TRAPEZOIDAL:
@@ -141,15 +156,12 @@ int main(int argc, char **argv){
 	float temppha[3] = {0, 0, 0};
 
 	Din Din;
-	Din.type = SQUARE;
-	memcpy(Din.F.hrm, temphrm, sizeof(temphrm));
-	memcpy(Din.F.amp, tempamp, sizeof(tempamp));
-	memcpy(Din.F.pha, temppha, sizeof(temppha));
-	Din.freq = 50;
+	Din.type = SAWTOOTH_RIGHT;
+	Din.freq = 50e-3;
 	Din.dc = 0;
 	Din.gain = 1;
 
-	for (int i = 0; i < 1e6; i++){
+	for (int i = 0; i < 1e3; i++){
 		float temp = 0;
 		temp = SintetizaWfm(Din);
 		printf("%f\r\n", temp);
