@@ -5,52 +5,29 @@
 #include <complex.h>
 #include <tgmath.h>
 #include <string.h>
+#include "sintetizawfm.h"
 
-#define N_HARM_FOURIER 20
+#define N_PONTOS 2e3
+#define TIMESTEP 40e-3
 
-
-
-typedef enum {
-	CUSTOM = 0,
-	SQUARE = 1,
-	TRIANGLE = 2,
-	SAWTOOTH_LEFT = 3,
-	SAWTOOTH_RIGHT = 4,
-	TRAPEZOIDAL = 5,
-	UNDEFINED = 99
-} WfmType;
-
-typedef struct {
-	uint8_t hrm[N_HARM_FOURIER];
-	float amp[N_HARM_FOURIER];
-	float pha[N_HARM_FOURIER];
-} WfmParam; //epah é o q ele chama Din.F dunno wtf é isso
-
-typedef struct {
-	uint8_t flag;
-	uint8_t Nh;
-	WfmType type;
-	WfmParam F; //nome lmao do prof :/
-	uint64_t ts;
-	float freq;
-	float dc;
-	float gain;
-} Din;
-
-static double time = 0;
+static double time = 0; 
 
 float SintetizaWfm(Din din){
+	/*
+		Ainda falta flags e verificaçoes
+		also tempo e n_pontos ainda ta hardcoded
+	*/
+
 	static float omega = 0;
 	static uint64_t ts = 0;
 	static uint8_t nh = 0;
 	static WfmType wavetype = UNDEFINED;
 	static float r[N_HARM_FOURIER] = {0};
 	static float beta[N_HARM_FOURIER] = {0};
-	static uint8_t k[N_HARM_FOURIER] = {0}; //Not sure if float
+	static uint8_t k[N_HARM_FOURIER] = {0}; 
 
 	float ak[N_HARM_FOURIER], bk[N_HARM_FOURIER];
 	float y = din.dc;
-
 
 	if (omega == 0){
 		omega = 2*M_PI*din.freq;
@@ -70,17 +47,14 @@ float SintetizaWfm(Din din){
 				r[i] = din.F.amp[i];
 				beta[i] = din.F.pha[i];
 			}
-			puts("Custom");
-
 		break;
 
 		case SQUARE:
 			for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
-				k[i] = i*2-1; //O -1 era por causa do matlab?
+				k[i] = i*2-1; 
 				ak[i] = 0;
 				bk[i] = 4/(M_PI*k[i]);
 			}
-			puts("SQUARE");
 		break;
 
 		case TRIANGLE:
@@ -88,7 +62,6 @@ float SintetizaWfm(Din din){
 				k[i]=2*i-1;
         	    ak[i]=0;
         	    bk[i]=8/(pow(M_PI,2)*pow(i,2))*pow(-1, (i-1));	
-				puts("TRIANGLE");
 			}
 		break;
 
@@ -97,7 +70,6 @@ float SintetizaWfm(Din din){
 				k[i]=i;
             	ak[i]=0;
             	bk[i]=-2*pow(-1, i)/(M_PI*i);
-				puts("SAWTOOTH LEFT");
 			}
 		break;
 
@@ -106,16 +78,15 @@ float SintetizaWfm(Din din){
 				k[i]=i;
             	ak[i]=0;
             	bk[i]=2*pow(-1, i)/(M_PI*i);
-				puts("SAWTOOTH RIGHT");
 			}
 		break;
 
 		case TRAPEZOIDAL:
-			puts("TRAPEZOIDAL");
+			puts("TRAPEZOIDAL nao implementado :(");
 		break;
 
 		default:
-			puts("Tipo de forma de onda inválido");
+			fprintf(stderr, "Tipo de forma de onda inválido");
 			return -1;
 	}
 
@@ -125,14 +96,12 @@ float SintetizaWfm(Din din){
 			beta[i] = cargf(ak[i] + I*bk[i]);
 		}
 	} 
-	else{
-		puts("Nao implementado :O");
-	}
 
 	for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
 		y += r[i] * cos(k[i]*omega*time+beta[i]);
 	}
-	time += 40e-3; // Wut?
+
+	time += TIMESTEP;
 	y = y*din.gain;
 
 	return y;
@@ -141,20 +110,20 @@ float SintetizaWfm(Din din){
 int main(int argc, char **argv){
 	FILE *data_in, *data_out;
 	if (argc != 3){
-		printf("Chamada ao programa incorreta!\r\n");
-		printf("Exemplo:\r\n $ main.c <ficheiro_de_entrada.txt> <ficheiro_de_saida.txt\r\n");
+		fprintf(stderr, "Chamada ao programa incorreta!\r\n");
+		fprintf(stderr,"Exemplo:\r\n $ main.c <ficheiro_de_entrada.txt> <ficheiro_de_saida.txt\r\n");
 		return -1;
 	}
 
 	data_in = fopen(argv[1], "r");
 	if (data_in == NULL){
-		printf("Erro ao ler o ficheiro de entrada \"%s\".\r\n", argv[1]);
+		fprintf(stderr, "Erro ao ler o ficheiro de entrada \"%s\".\r\n", argv[1]);
 		return -1;
 	}
 
 	data_out = fopen(argv[2], "w");
 	if (data_out == NULL){
-		printf("Erro ao ler o ficheiro de saida \"%s\".\r\n", argv[2]);
+		fprintf(stderr, "Erro ao ler o ficheiro de saida \"%s\".\r\n", argv[2]);
 		return -1;
 	}
 
@@ -167,6 +136,8 @@ int main(int argc, char **argv){
 	//uint8_t temphrm[3] = {1, 2, 3};
 	//float tempamp[3] = {1, 0.5, 0.25};
 	//float temppha[3] = {M_PI, 0, 0};
+
+	//Definição dos sinais
 
 	Din din_square;
 	din_square.type = SQUARE;
@@ -186,6 +157,7 @@ int main(int argc, char **argv){
 	din.dc = 0;
 	din.gain = 1;
 
+	//Atribuicao e Padding dos vetores dos harmonicos
 	uint8_t harm_len = sizeof(temphrm)/sizeof(uint8_t);
 	for(int i = 0; i < N_HARM_FOURIER; i++){
 		if (i < harm_len){
@@ -200,10 +172,12 @@ int main(int argc, char **argv){
 		}
 	}
 
+	//Vetor conjunto (HARDCODED) para os sinais conjuntos
 	Din vect[] = {din_square, din_triangle, din};
 
+	//Gera Pontos para o vetor conjunto
 	for(uint8_t waveidx = 0; waveidx < 3; waveidx++){
-		for(int i = 0; i < 2e3; i++){
+		for(int i = 0; i < N_PONTOS; i++){
 			float temp = 0;
 			temp = SintetizaWfm(vect[waveidx]);
 			printf("%f\r\n", temp);
