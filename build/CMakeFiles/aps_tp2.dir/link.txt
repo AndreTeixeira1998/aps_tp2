@@ -1,0 +1,1 @@
+/usr/bin/cc   -rdynamic CMakeFiles/aps_tp2.dir/main.c.o  -o aps_tp2  -lm 
