@@ -8,6 +8,8 @@
 
 #define N_HARM_FOURIER 20
 
+
+
 typedef enum {
 	CUSTOM = 0,
 	SQUARE = 1,
@@ -20,8 +22,8 @@ typedef enum {
 
 typedef struct {
 	uint8_t hrm[N_HARM_FOURIER];
-	uint8_t amp[N_HARM_FOURIER];
-	uint8_t pha[N_HARM_FOURIER];
+	float amp[N_HARM_FOURIER];
+	float pha[N_HARM_FOURIER];
 } WfmParam; //epah é o q ele chama Din.F dunno wtf é isso
 
 typedef struct {
@@ -35,15 +37,16 @@ typedef struct {
 	float gain;
 } Din;
 
+static double time = 0;
+
 float SintetizaWfm(Din din){
 	static float omega = 0;
 	static uint64_t ts = 0;
-	static double time = 0;
 	static uint8_t nh = 0;
 	static WfmType wavetype = UNDEFINED;
 	static float r[N_HARM_FOURIER] = {0};
 	static float beta[N_HARM_FOURIER] = {0};
-	static float k[N_HARM_FOURIER] = {0}; //Not sure if float
+	static uint8_t k[N_HARM_FOURIER] = {0}; //Not sure if float
 
 	float ak[N_HARM_FOURIER], bk[N_HARM_FOURIER];
 	float y = din.dc;
@@ -62,6 +65,11 @@ float SintetizaWfm(Din din){
 
 	switch(wavetype){
 		case CUSTOM:
+			for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
+				k[i] = din.F.hrm[i];
+				r[i] = din.F.amp[i];
+				beta[i] = din.F.pha[i];
+			}
 			puts("Custom");
 
 		break;
@@ -150,22 +158,57 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-
+	//Custom1
 	uint8_t temphrm[3] = {1, 2, 3};
 	float tempamp[3] = {1, 0.5, 0.25};
 	float temppha[3] = {0, 0, 0};
 
-	Din Din;
-	Din.type = SAWTOOTH_RIGHT;
-	Din.freq = 50e-3;
-	Din.dc = 0;
-	Din.gain = 1;
+	//Custom2
+	//uint8_t temphrm[3] = {1, 2, 3};
+	//float tempamp[3] = {1, 0.5, 0.25};
+	//float temppha[3] = {M_PI, 0, 0};
 
-	for (int i = 0; i < 1e3; i++){
-		float temp = 0;
-		temp = SintetizaWfm(Din);
-		printf("%f\r\n", temp);
-		fprintf(data_out, "%d,%f\r\n", i, temp);
+	Din din_square;
+	din_square.type = SQUARE;
+	din_square.freq = 50e-3;
+	din_square.dc = 0;
+	din_square.gain = 1;
+
+	Din din_triangle;
+	din_triangle.type = TRIANGLE;
+	din_triangle.freq = 50e-3;
+	din_triangle.dc = 0;
+	din_triangle.gain = 1;
+
+	Din din;
+	din.type = CUSTOM;
+	din.freq = 50e-3;
+	din.dc = 0;
+	din.gain = 1;
+
+	uint8_t harm_len = sizeof(temphrm)/sizeof(uint8_t);
+	for(int i = 0; i < N_HARM_FOURIER; i++){
+		if (i < harm_len){
+			din.F.hrm[i] = temphrm[i];
+			din.F.amp[i] = tempamp[i];
+			din.F.pha[i] = temppha[i];
+		}
+		else {
+			din.F.hrm[i] = 0;
+			din.F.amp[i] = 0;
+			din.F.pha[i] = 0;
+		}
+	}
+
+	Din vect[] = {din_square, din_triangle, din};
+
+	for(uint8_t waveidx = 0; waveidx < 3; waveidx++){
+		for(int i = 0; i < 2e3; i++){
+			float temp = 0;
+			temp = SintetizaWfm(vect[waveidx]);
+			printf("%f\r\n", temp);
+			fprintf(data_out, "%f,%f\r\n", time, temp);
+		}
 	}
 
 	fclose(data_in);

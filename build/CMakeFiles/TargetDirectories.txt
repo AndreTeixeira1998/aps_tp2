@@ -1,3 +1,0 @@
-/home/ruimsc98/Desktop/aps/tp1/build/CMakeFiles/rebuild_cache.dir
-/home/ruimsc98/Desktop/aps/tp1/build/CMakeFiles/edit_cache.dir
-/home/ruimsc98/Desktop/aps/tp1/build/CMakeFiles/aps_tp2.dir
