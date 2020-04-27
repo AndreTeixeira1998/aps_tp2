@@ -82,6 +82,11 @@ float SintetizaWfm(Din din){
 		break;
 
 		case TRAPEZOIDAL:
+			for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
+				k[i]=i;
+            	ak[i]=0;
+            	bk[i]= -((256*pow(sin(M_PI*i/8),3))*(2*pow(sin(M_PI*i/8),4)-3*pow(sin(M_PI*i/8),2)+1))/(pow(M_PI,2)*pow(i,2));
+			}
 			puts("TRAPEZOIDAL nao implementado :(");
 		break;
 
@@ -140,7 +145,7 @@ int main(int argc, char **argv){
 	//Definição dos sinais
 
 	Din din_square;
-	din_square.type = SQUARE;
+	din_square.type = TRAPEZOIDAL;
 	din_square.freq = 50e-3;
 	din_square.dc = 0;
 	din_square.gain = 1;
@@ -173,10 +178,10 @@ int main(int argc, char **argv){
 	}
 
 	//Vetor conjunto (HARDCODED) para os sinais conjuntos
-	Din vect[] = {din_square, din_triangle, din};
+	Din vect[] = {din_square};
 
 	//Gera Pontos para o vetor conjunto
-	for(uint8_t waveidx = 0; waveidx < 3; waveidx++){
+	for(uint8_t waveidx = 0; waveidx < 1; waveidx++){
 		for(int i = 0; i < N_PONTOS; i++){
 			float temp = 0;
 			temp = SintetizaWfm(vect[waveidx]);
