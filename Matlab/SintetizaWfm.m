@@ -23,13 +23,11 @@
 function [y, debug] = SintetizaWfm(Din)
 
 persistent omega; if isempty(omega), omega=0; end
-if omega ~= 2*pi*Din.Freq,
+if omega ~= 2*pi*Din.Freq
     omega = 2*pi*Din.Freq;  % Verifica se frequência altera
-    
-    while omega>2*pi        % Para ficar menor que 2*pi
-        omega = omega - 2*pi;
-    end
 end
+
+persistent wavetype; if isempty(wavetype),wavetype = 1;end
 
 persistent Ts; if isempty(Ts), Ts=0; end
 persistent Nh; if isempty(Nh), Nh=0; end
@@ -125,6 +123,11 @@ if Din.flag == 1
     
     
 else
+    if wavetype ~= Din.Type
+        wavetype = Din.Type;
+        time=0;
+    end
+    
     y=Din.DC;
     switch Din.Type
         case 1
@@ -155,8 +158,8 @@ else
                 y= y + r(i)*cos(k(i)*omega*time + Beta(i));
             end
     end
-    Din.Ts
-    time = time + 0.04;
+    Din.Freq
+    time = time + Ts;
     
     y=y*Din.Gain;
     debug=0;
