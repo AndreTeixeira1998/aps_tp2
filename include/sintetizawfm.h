@@ -26,20 +26,26 @@ typedef struct {
 	uint8_t hrm[N_HARM_FOURIER];
 	float amp[N_HARM_FOURIER];
 	float pha[N_HARM_FOURIER];
-} WfmParam; //epah é o q ele chama Din.F dunno wtf é isso
+} WfmParam;
 
 typedef struct {
 	uint8_t flag;
 	uint8_t Nh;
 	WfmType type;
-	WfmParam F; //nome lmao do prof :/
+	WfmParam F; 
 	uint64_t ts;
 	float freq;
 	float dc;
 	float gain;
 } Din;
 
+typedef struct{
+	Din din;
+	uint32_t n_pontos; 
+	float duration; 
+} Sig; 
 
-float SintetizaWfm(Din din);
+Din CustomizaWfm(Din din, uint8_t *temphrm, float *tempamp, float *temppha, uint8_t vect_len);
+float SintetizaWfm(Din din, double *time, double ts);
 
 #endif
