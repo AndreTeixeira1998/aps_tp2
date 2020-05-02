@@ -49,6 +49,7 @@ int main(int argc, char **argv){
 	
 	//Parametros para onda Quadrada
 	Din din_square;
+	din_square.flag = 1;
 	din_square.type = SQUARE;
 	din_square.freq = 50;
 	din_square.dc = 0;
@@ -56,6 +57,7 @@ int main(int argc, char **argv){
 	
 	//Parametros para onda triangular
 	Din din_triangle;
+	din_triangle.flag = 0;
 	din_triangle.type = TRIANGLE;
 	din_triangle.freq = 50;
 	din_triangle.dc = 0;
@@ -63,20 +65,23 @@ int main(int argc, char **argv){
 
 	//Parametros para dente de serra com degrau a esquerda
 	Din din_sawL;
+	din_sawL.flag = 0;
 	din_sawL.type = SAWTOOTH_LEFT;
 	din_sawL.freq = 50;
-	din_sawL.dc = 0;
+	din_sawL.dc = 1;
 	din_sawL.gain = 1;
 
 	//Parametros para dente de serra com degrau a direita
 	Din din_sawR;
+	din_sawR.flag = 0;
 	din_sawR.type = SAWTOOTH_RIGHT;
 	din_sawR.freq = 50;
-	din_sawR.dc = 0;
+	din_sawR.dc = -1;
 	din_sawR.gain = 1;
 
 	//Parametros para onda trapezoidal
 	Din din_trap;
+	din_trap.flag = 0;
 	din_trap.type = TRAPEZOIDAL;
 	din_trap.freq = 50;
 	din_trap.dc = 0;
@@ -84,6 +89,7 @@ int main(int argc, char **argv){
 
 	//Parametros para onda personalizada
 	Din din;
+	din.flag = 0;
 	din.type = CUSTOM;
 	din.freq = 50;
 	din.dc = 0;
@@ -96,6 +102,7 @@ int main(int argc, char **argv){
 
 	//Parametros para segunda onda personalizada (con inversao de fase)
 	Din din2;
+	din2.flag = 0;
 	din2.type = CUSTOM;
 	din2.freq = 50;
 	din2.dc = 0;
