@@ -127,7 +127,7 @@ else
         wavetype = Din.Type;
         time=0;
     end
-   	
+    y = 0;
     switch Din.Type
         case 1
             for i=1:Nh
