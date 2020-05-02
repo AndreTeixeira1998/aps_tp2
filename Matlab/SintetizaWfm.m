@@ -1,30 +1,30 @@
 % Din.flag
 %
 % Din.Nh      Numero de harmonicos para decomposicao/sintese
-% Din.Ts      Periodo de execução (seg)
+% Din.Ts      Periodo de execuÃ§Ã£o (seg)
 %
 % Din.Din.Type    Tipo de forma de onda
 %             0: definida por Din.F.Hrm, Din.F.Amp e Din.F.Pha
 %             1: quadrada
 %             2: triangular
-%             3: dente de serra, degrau à esquerda
-%             4: dente de serra, degrau à direita
+%             3: dente de serra, degrau Ã  esquerda
+%             4: dente de serra, degrau Ã  direita
 %             5: trapezoidal
-%                duração de cada intervalo: 1/8 periodo
+%                duraÃ§Ã£o de cada intervalo: 1/8 periodo
 %                zero; sobe para um; um; desce para zero; zero; desce para
 %                menos um; menos um; sobe para zero
 % Din.Freq    Frequencia da onda a sintetizar (Hz)
 % Din.DC      Valor DC (valor medio) da onda a sintetizar
-% Din.Gain    Ganho a aplicar à forma de onda sintetizada por Fourier
+% Din.Gain    Ganho a aplicar Ã  forma de onda sintetizada por Fourier
 
-% Devem usar a formula de fourier que usa apenas uma função trigonometrica
+% Devem usar a formula de fourier que usa apenas uma funÃ§Ã£o trigonometrica
 % O calculo dos coeficientes deve ser feita apenas quando flag=1
 
 function [y, debug] = SintetizaWfm(Din)
 
 persistent omega; if isempty(omega), omega=0; end
 if omega ~= 2*pi*Din.Freq
-    omega = 2*pi*Din.Freq;  % Verifica se frequência altera
+    omega = 2*pi*Din.Freq;  % Verifica se frequÃªncia altera
 end
 
 persistent wavetype; if isempty(wavetype),wavetype = 1;end
@@ -53,7 +53,7 @@ persistent r_trap; if isempty(r_trap),r_trap = zeros(1,Nh);end
 persistent Beta_trap; if isempty(Beta_trap),Beta_trap = zeros(1,Nh);end
 persistent k_trap; if isempty(k_trap),k_trap = zeros(1,Nh);end
 
-%   Configura os harmónicos das ondas para um Nh
+%   Configura os harmÃ³nicos das ondas para um Nh
 if Din.flag == 1
     
     Ts = Din.Ts;
@@ -85,7 +85,7 @@ if Din.flag == 1
     Beta_tri=angle(ak+1i*bk);
     
    
-    %dente de serra, degrau à esquerda
+    %dente de serra, degrau Ã  esquerda
     ak = zeros(1,Nh);
     bk = zeros(1,Nh);
     for i = 1:Nh
@@ -96,7 +96,7 @@ if Din.flag == 1
     r_saw_l=sqrt(ak.^2+bk.^2);
     Beta_saw_l=angle(ak+1i*bk);
     
-    %dente de serra, degrau à direita
+    %dente de serra, degrau Ã  direita
     ak = zeros(1,Nh);
     bk = zeros(1,Nh);
     for i = 1:Nh
@@ -127,8 +127,7 @@ else
         wavetype = Din.Type;
         time=0;
     end
-    
-    y=Din.DC;
+   	
     switch Din.Type
         case 1
             for i=1:Nh
@@ -162,5 +161,6 @@ else
     time = time + Ts;
     
     y=y*Din.Gain;
+    y=y+Din.DC;
     debug=0;
 end
