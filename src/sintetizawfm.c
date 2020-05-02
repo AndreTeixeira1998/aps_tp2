@@ -36,15 +36,16 @@ float SintetizaWfm(Din din, double *time, double ts){
 	omega = 2*M_PI*din.freq;
 	wavetype = din.type;
 
+	float y = 0;
+
 	if (din.flag == 1){
 		float ak[N_HARM_FOURIER], bk[N_HARM_FOURIER];
-		float y = din.dc;
 
 		//	Square wave harmonic calculation
 		for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
 			k_square[i] = i*2-1; 
 			ak[i] = 0;
-			bk[i] = 4/(M_PI*k[i]);
+			bk[i] = 4/(M_PI*k_square[i]);
 		}
 		for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
 			r_square[i] = sqrt(pow(ak[i], 2) + pow(bk[i], 2));	
@@ -54,8 +55,8 @@ float SintetizaWfm(Din din, double *time, double ts){
 		//	Triangular wave harmonic calculation
 		for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
 			k_tri[i]=2*i-1;
-           		ak[i]=0;
-           		bk[i]=8/(pow(M_PI,2)*pow(i,2))*pow(-1, (i-1));	
+           	ak[i]=0;
+           	bk[i]=8/(pow(M_PI,2)*pow(i,2))*pow(-1, (i-1));	
 		}
 		for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
 			r_tri[i] = sqrt(pow(ak[i], 2) + pow(bk[i], 2));	
@@ -76,8 +77,8 @@ float SintetizaWfm(Din din, double *time, double ts){
 		//	Sawtooth right wave harmonic calculation
 		for (uint8_t i = 1; i < N_HARM_FOURIER; i++){
 			k_saw_r[i]=i;
-       			ak[i]=0;
-       			bk[i]=2*pow(-1, i)/(M_PI*i);
+       		ak[i]=0;
+       		bk[i]=2*pow(-1, i)/(M_PI*i);
 		}
 		for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
 			r_saw_r[i] = sqrt(pow(ak[i], 2) + pow(bk[i], 2));	
@@ -97,16 +98,16 @@ float SintetizaWfm(Din din, double *time, double ts){
 		}
 		return 0;
 	}
-	if(din.flag==0){
+	else if(din.flag==0){
 		switch(wavetype){
 			case CUSTOM:
 				for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
-					y += din.F.amp[i]; * cos(din.F.hrm[i]*omega*(*time)+din.F.pha[i]);
+					y += din.F.amp[i] * cos(din.F.hrm[i]*omega*(*time)+din.F.pha[i]);
 				}	
 				break;
 			case SQUARE:
 				for (uint8_t i = 0; i < N_HARM_FOURIER; i++){
-					y += r_square[i] * cos(k_sqaure[i]*omega*(*time)+beta_square[i]);
+					y += r_square[i] * cos(k_square[i]*omega*(*time)+beta_square[i]);
 				}	
 				break;
 			case TRIANGLE:
@@ -134,9 +135,14 @@ float SintetizaWfm(Din din, double *time, double ts){
 				exit(0);
 		}
 		*time += ts;
-		y = y*din.gain;
+		y *= din.gain;
+		y += din.dc;
 	
 		return y;
+	}
+	else {
+		printf("Flag não especificada! Operacao cancelada\n");
+		exit(0);
 	}
 }
 
