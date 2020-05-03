@@ -1,7 +1,8 @@
 ########################################################################################
 ###                                                                                  ###
-###          OOOOOOOOOOOOOOOOOOOOOOOOOOOhhhhh                                        ###
-###                                          WEEEEEEEEEEEEEEEEEEEEEEEEEEEE           ###
+###   APS_TP1                                                                        ###
+###   Gerador de formas de onda - ficheiro de configuracao                           ###
+###   ----------------------------------------------------------------------------   ###
 ###                                                                                  ###
 ###   Tipos: 0 -> sinal customizavel                                                 ###
 ###          1 -> onda quadrada                                                      ###
@@ -9,6 +10,37 @@
 ###          3 -> onda dente-de-serra com degrau à esquerda                          ###
 ###          4 -> onda dente-de-serra com degrau à direita                           ###
 ###          5 -> onda trapezoidal                                                   ###
+###          99-> onda não definida (pode ser usado para inicializacao)              ###
+###                                                                                  ###
+###   Exemplo (criaçao de uma onda quarada):                                         ###                             ###
+###      tipo: 1                                                                     ###   
+###      freq: 50                                                                    ### 
+###      ganho: 1                                                                    ###     
+###      dc: 1                                                                       ###
+###      flag: 0                                                                     ###                        
+###      dur: 40e-3                                                                  ###
+###                                                                                  ###                                                          ###
+###   Exemplo (criaçao de uma onda de inicializacao):                                         ###                             ###
+###      tipo: 99                                                                     ###       
+###      flag: 1                                                                     ###                        
+###      dur: 0                                                                  ###
+###                                                                                  ###
+###   Exemplo (criaçao de uma onda customizavel):                                    ###                             ###
+###      tipo: 1                                                                     ###   
+###      freq: 50                                                                    ### 
+###      ganho: 1                                                                    ###     
+###      dc: 1                                                                       ###
+###      flag: 0                                                                     ###
+###      harm: 1, 2, 3                                                               ###
+###      amp: 1, 2, 3                                                                ###
+###      pha: 1, 2, 3                                                                ###                        
+###      dur: 40e-3                                                                  ###                                                                                  ###
+###                                                                                  ###
+###   NOTA: - A ordem dos parametros tem de ser respeitado e nenhum parametro        ###
+###         pode ser deixado em branco ou omitido.                                   ###                                                                                                                                                                                               ###
+###         - Os parametros harm, amp e pha so deverao ser usados nas ondas do       ###
+###         tipo 0                                                                   ###
+###         - Todos os valores devem ser introduzidos de forma numérica              ###
 ###                                                                                  ###
 ########################################################################################
 
@@ -18,56 +50,45 @@ flag: 1
 dur: 0
 
 
-# Onda 1
+# Onda quadrada
 tipo: 1
 freq: 50
 ganho: 1
-dc: 1
+dc: 2
 flag: 0
 dur: 40e-3
 
-# Onda 1
+# Onda quadrada
 tipo: 1
 freq: 50
-ganho: 1
-dc: 1
+ganho: 3
+dc: 0
 flag: 0
 dur: 40e-3
 
-# Onda 1
-tipo: 2
-freq: 200
+# Onda quadrada
+tipo: 0
+freq: 50
 ganho: 1
-dc: 1
+dc: 0
 flag: 0
-dur: 20e-3
-
-# Onda 1
-tipo: 4
-freq: 20
-ganho: 2
-dc: -5
-flag: 0
-dur: 120e-3
-
-# Onda 1
-tipo: 0
-freq: 20
-ganho: 2
-dc: -5
-flag: 0
-harm: 1, 2, 3
-amp: 2, 2, 2
-pha: 3.14, 0, 0
-dur: 120e-3
-
-# Onda 1
-tipo: 0
-freq: 20
-ganho: 2
-dc: -5
-flag: 0
-harm: 1, 2, 3
-amp: 2, 2, 2
+harm:1, 2, 3
+amp: 1, 0.5, 0.25
 pha: 0, 0, 0
-dur: 120e-3
+dur: 40e-3
+
+# Onda triangular
+tipo: 2
+freq: 100
+ganho: 2
+dc: -1
+flag: 0
+dur: 40e-3
+
+# Onda trapezoidal
+tipo: 5
+freq: 70
+ganho: 1
+dc: 1
+flag: 0
+dur: 40e-3
