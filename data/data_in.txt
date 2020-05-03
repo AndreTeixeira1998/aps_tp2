@@ -1,0 +1,73 @@
+########################################################################################
+###                                                                                  ###
+###          OOOOOOOOOOOOOOOOOOOOOOOOOOOhhhhh                                        ###
+###                                          WEEEEEEEEEEEEEEEEEEEEEEEEEEEE           ###
+###                                                                                  ###
+###   Tipos: 0 -> sinal customizavel                                                 ###
+###          1 -> onda quadrada                                                      ###
+###          2 -> onda triangular                                                    ###
+###          3 -> onda dente-de-serra com degrau à esquerda                          ###
+###          4 -> onda dente-de-serra com degrau à direita                           ###
+###          5 -> onda trapezoidal                                                   ###
+###                                                                                  ###
+########################################################################################
+
+# Onda 0 (de inicializacao nao remover)
+tipo: 99
+flag: 1
+dur: 0
+
+
+# Onda 1
+tipo: 1
+freq: 50
+ganho: 1
+dc: 1
+flag: 0
+dur: 40e-3
+
+# Onda 1
+tipo: 1
+freq: 50
+ganho: 1
+dc: 1
+flag: 0
+dur: 40e-3
+
+# Onda 1
+tipo: 2
+freq: 200
+ganho: 1
+dc: 1
+flag: 0
+dur: 20e-3
+
+# Onda 1
+tipo: 4
+freq: 20
+ganho: 2
+dc: -5
+flag: 0
+dur: 120e-3
+
+# Onda 1
+tipo: 0
+freq: 20
+ganho: 2
+dc: -5
+flag: 0
+harm: 1, 2, 3
+amp: 2, 2, 2
+pha: 3.14, 0, 0
+dur: 120e-3
+
+# Onda 1
+tipo: 0
+freq: 20
+ganho: 2
+dc: -5
+flag: 0
+harm: 1, 2, 3
+amp: 2, 2, 2
+pha: 0, 0, 0
+dur: 120e-3

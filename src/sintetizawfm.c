@@ -32,10 +32,6 @@ float SintetizaWfm(Din din, double *time, double ts){
 	static float beta_trap[N_HARM_FOURIER] = {0};
 	static uint8_t k_trap[N_HARM_FOURIER] = {0}; 
 	
-	
-	omega = 2*M_PI*din.freq;
-	wavetype = din.type;
-
 	float y = 0;
 
 	if (din.flag == 1){
@@ -99,6 +95,8 @@ float SintetizaWfm(Din din, double *time, double ts){
 		return 0;
 	}
 	else if(din.flag==0){
+		omega = 2*M_PI*din.freq;
+		wavetype = din.type;
 		switch(wavetype){
 			case CUSTOM:
 				for (uint8_t i = 0; i < N_HARM_FOURIER; i++){

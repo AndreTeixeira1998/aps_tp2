@@ -8,10 +8,16 @@
 #include "sintetizawfm.h"
 
 //Tempo de amostragem
-#define SAMPLING_TIME 100e-6 
+#define SAMPLING_TIME 100e-6
 
-//Ativar modo debug
+#define BUFFER_SIZE 256
+#define N_SIGNALS 10
+
+//Ativar/Desativar modo debug
 #define DEBUG 0
+
+
+#define INVALID_PARAMETER 1
 
 //Macro para calculo de no de pontos a amostrar para um intervalo de tempo dt
 #define N_PONTOS(dt) (uint32_t)(dt/SAMPLING_TIME) 
@@ -46,95 +52,95 @@ int main(int argc, char **argv){
 		return -1;
 	}
 
-	
-	//Parametros para onda Quadrada
-	Din din_square;
-	din_square.flag = 1;
-	din_square.type = SQUARE;
-	din_square.freq = 50;
-	din_square.dc = 0;
-	din_square.gain = 1;
-	
-	//Parametros para onda triangular
-	Din din_triangle;
-	din_triangle.flag = 0;
-	din_triangle.type = TRIANGLE;
-	din_triangle.freq = 50;
-	din_triangle.dc = 0;
-	din_triangle.gain = 1;
+	char buffer[BUFFER_SIZE];
+	char *parametro, *atributo;
+	uint8_t idx_sinal = UNDEFINED;
+	Din din_vect[N_SIGNALS];
+	Sig sig_vect[N_SIGNALS];
+	uint8_t harm_len = 0;
+	uint8_t temphrm[N_HARM_FOURIER] = {1, 2, 3};
+	float tempamp[N_HARM_FOURIER] = {1, 0.5, 0.25};
+	float temppha[N_HARM_FOURIER] = {0, 0, 0};
 
-	//Parametros para dente de serra com degrau a esquerda
-	Din din_sawL;
-	din_sawL.flag = 0;
-	din_sawL.type = SAWTOOTH_LEFT;
-	din_sawL.freq = 50;
-	din_sawL.dc = 1;
-	din_sawL.gain = 1;
+	while(fgets(buffer, BUFFER_SIZE, data_in)) {
+		if ((buffer[0] == '#') || (buffer[0] == '\n') || (buffer[0] == '\r')) continue;
+		parametro = strtok(buffer, ":");
+		atributo = strtok(NULL, "\n");
 
-	//Parametros para dente de serra com degrau a direita
-	Din din_sawR;
-	din_sawR.flag = 0;
-	din_sawR.type = SAWTOOTH_RIGHT;
-	din_sawR.freq = 50;
-	din_sawR.dc = -1;
-	din_sawR.gain = 1;
+		if (!strcmp(parametro, "tipo")){
+			idx_sinal == UNDEFINED ? idx_sinal = 0 : idx_sinal++;
+			din_vect[idx_sinal].type = atoi(atributo);
+		}
+		else if (!strcmp(parametro, "ganho")){
+			atributo != NULL ? din_vect[idx_sinal].gain = atof(atributo) : exit(INVALID_PARAMETER);
+		}
+		else if (!strcmp(parametro, "dc")){
+			atributo != NULL ? din_vect[idx_sinal].dc = atof(atributo) : exit(INVALID_PARAMETER);
+		}
+		else if (!strcmp(parametro, "flag")){
+			atributo != NULL ? din_vect[idx_sinal].flag = atoi(atributo) : exit(INVALID_PARAMETER);
+		}
+		else if (!strcmp(parametro, "freq")){
+			atributo != NULL ? din_vect[idx_sinal].freq = atof(atributo) : exit(INVALID_PARAMETER);
+		}
+		else if (!strcmp(parametro, "harm")){
+			if(atributo != NULL){
+				atributo = strtok(atributo, ",");
+				uint8_t idx = 0; 
+				while (atributo != NULL){
+					temphrm[idx] = atoi(atributo);
+					atributo = strtok(NULL, ",\n");
+					idx++;
+				}
+				harm_len = idx;
+			}
+			else{
+				 exit(INVALID_PARAMETER);
+			}
+		}
+		else if (!strcmp(parametro, "amp")){
+			if(atributo != NULL){
+				atributo = strtok(atributo, ",");
+				for (uint8_t idx = 0; atributo != NULL; idx++){
+					tempamp[idx] = atof(atributo);
+					atributo = strtok(NULL, ",\n");
+				}
+			}
+			else{
+				 exit(INVALID_PARAMETER);
+			}
+		}
+		else if (!strcmp(parametro, "pha")){
+			if(atributo != NULL){
+				atributo = strtok(atributo, ",");
+				for (uint8_t idx = 0; atributo != NULL; idx++){
+					temppha[idx] = atof(atributo);
+					atributo = strtok(NULL, ",\n");
+				}
+			}
+			else{
+				 exit(INVALID_PARAMETER);
+			}
+		}
+		else if (!strcmp(parametro, "dur")){
+			if (din_vect[idx_sinal].type == 0){
+				din_vect[idx_sinal] = CustomizaWfm(din_vect[idx_sinal], temphrm, tempamp, temppha, harm_len);
+			}
+			double duration_temp = 0;
+			sscanf(atributo, "%lf", &duration_temp);
+			sig_vect[idx_sinal] = CriaSinal(din_vect[idx_sinal], duration_temp);
+		}
+	}
 
-	//Parametros para onda trapezoidal
-	Din din_trap;
-	din_trap.flag = 0;
-	din_trap.type = TRAPEZOIDAL;
-	din_trap.freq = 50;
-	din_trap.dc = 0;
-	din_trap.gain = 1;
-
-	//Parametros para onda personalizada
-	Din din;
-	din.flag = 0;
-	din.type = CUSTOM;
-	din.freq = 50;
-	din.dc = 0;
-	din.gain = 1;
-	uint8_t temphrm[] = {1, 2, 3};
-	uint8_t harm_len = sizeof(temphrm)/sizeof(uint8_t);
-	float tempamp[] = {1, 0.5, 0.25};
-	float temppha[] = {0, 0, 0};
-	din = CustomizaWfm(din, temphrm, tempamp, temppha, harm_len);
-
-	//Parametros para segunda onda personalizada (con inversao de fase)
-	Din din2;
-	din2.flag = 0;
-	din2.type = CUSTOM;
-	din2.freq = 50;
-	din2.dc = 0;
-	din2.gain = 1;
-	uint8_t temphrm2[] = {1, 2, 3};
-	uint8_t harm_len2 = sizeof(temphrm)/sizeof(uint8_t);
-	float tempamp2[] = {1, 0.5, 0.25};
-	float temppha2[] = {M_PI, 0, 0};
-	din2 = CustomizaWfm(din, temphrm2, tempamp2, temppha2, harm_len2);
-
-	//Criacao dos sinais de entrada (parametros e duraçao)
-	//Nota: e considerado o tempo de amostragem fixo (ver defines)
-	Sig x1 = CriaSinal(din_square, 40e-3);
-	Sig x2 = CriaSinal(din_triangle, 40e-3);
-	Sig x3 = CriaSinal(din_sawL, 40e-3);
-	Sig x4 = CriaSinal(din_sawR, 40e-3);
-	Sig x5 = CriaSinal(din_trap, 40e-3);
-	Sig x6 = CriaSinal(din, 40e-3);
-	Sig x7 = CriaSinal(din2, 40e-3);
-	Sig x8 = CriaSinal(din_square, 60e-3);
-
-	//Vector conjunto de sinais a sintetizar
-	Sig vect[] = {x1, x2, x3, x4, x5, x6, x7, x8};
-	uint8_t vect_len = sizeof(vect)/sizeof(Sig);
-
-	//Gera Pontos para o vetor conjunto
+	//Inicializacao
+	SintetizaWfm(sig_vect[0].din, &time, SAMPLING_TIME);
 	float temp = 0;
-	for(uint8_t waveidx = 0; waveidx < vect_len; waveidx++){
-		for(int i = 0; i < vect[waveidx].n_pontos; i++){
-			temp = SintetizaWfm(vect[waveidx].din, &time, SAMPLING_TIME);
-			#if DEBUG
-			printf("Onda no:%d \tTipo:%d \t ponto no:%d\t t:%f \ty:%f\r\n", waveidx, vect[waveidx].din.type, i, time, temp);
+
+	for(uint8_t waveidx = 0; waveidx <= idx_sinal; waveidx++){
+		for(int i = 0; i < sig_vect[waveidx].n_pontos; i++){
+			temp = SintetizaWfm(sig_vect[waveidx].din, &time, SAMPLING_TIME);
+			#if DEBUG 
+			printf("Onda no:%d \tTipo:%d \t ponto no:%d\t t:%f \ty:%f\r\n", waveidx, sig_vect[waveidx].din.type, i, time, temp);
 			#endif
 			fprintf(data_out, "%f, %f\r\n", time, temp);
 		}
